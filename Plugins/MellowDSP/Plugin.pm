@@ -6,11 +6,6 @@ use warnings;
 use base qw(Slim::Plugin::Base);
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
-use Slim::Web::Pages;
-use Plugins::MellowDSP::PlayerSettings;
-use Plugins::MellowDSP::Settings;
-use Plugins::MellowDSP::SOXProcessor;
-use Plugins::MellowDSP::FIRProcessor;
 
 my $log = logger('plugin.mellowdsp');
 my $prefs = preferences('plugin.mellowdsp');
@@ -18,9 +13,8 @@ my $prefs = preferences('plugin.mellowdsp');
 sub initPlugin {
     my $class = shift;
     
-    $log->info("MellowDSP v2.0.0 initializing...");
+    $log->info("MellowDSP v2.0.1 initializing...");
     
-    # Preferenze globali
     $prefs->init({
         enabled => 0,
         sox_path => '/usr/bin/sox',
@@ -28,19 +22,15 @@ sub initPlugin {
         buffer_size => 8,
     });
     
-    # Registra pagina Advanced Settings
-    Slim::Web::Pages->addPageFunction(
-        'plugins/MellowDSP/settings/advanced.html',
-        \&Plugins::MellowDSP::Settings::advancedSettings
-    );
+    if (main::WEBUI) {
+        require Plugins::MellowDSP::Settings;
+        require Plugins::MellowDSP::PlayerSettings;
+        Plugins::MellowDSP::Settings->new($class);
+        Plugins::MellowDSP::PlayerSettings->new($class);
+    }
     
-    # Registra pagina Player Settings
-    Slim::Web::Pages->addPageFunction(
-        'plugins/MellowDSP/playersettings/basic.html',
-        \&Plugins::MellowDSP::PlayerSettings::playerSettings
-    );
-    
-    # Inizializza moduli
+    require Plugins::MellowDSP::SOXProcessor;
+    require Plugins::MellowDSP::FIRProcessor;
     Plugins::MellowDSP::SOXProcessor->init();
     Plugins::MellowDSP::FIRProcessor->init();
     
@@ -50,10 +40,6 @@ sub initPlugin {
 
 sub getDisplayName {
     return 'PLUGIN_MELLOWDSP';
-}
-
-sub settingsClass {
-    return 'Plugins::MellowDSP::Settings';
 }
 
 1;

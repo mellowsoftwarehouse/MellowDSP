@@ -3,7 +3,7 @@
 	<id>91d8fb10-mellow-11e3-ac10-0800200c9a66</id>
 	<name>PLUGIN_MELLOWDSP</name>
 	<module>Plugins::MellowDSP::Plugin</module>
-	<version>2.0.0</version>
+	<version>2.0.1</version>
 	<description>PLUGIN_MELLOWDSP_DESC</description>
 	<creator>mellowsoftwarehouse</creator>
 	<email>mellow@softwarehouse.com</email>

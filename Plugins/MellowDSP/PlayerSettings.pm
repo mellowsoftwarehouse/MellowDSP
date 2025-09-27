@@ -5,45 +5,45 @@ use warnings;
 use base qw(Slim::Web::Settings);
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
-use Plugins::MellowDSP::FIRProcessor;
 
 my $log = logger('plugin.mellowdsp.player');
 my $prefs = preferences('plugin.mellowdsp');
+my $plugin;
 
-sub name {
-    return 'PLUGIN_MELLOWDSP_PLAYER';
+sub new {
+    my $class = shift;
+    $plugin = shift;
+    
+    $class->SUPER::new;
 }
 
-sub page {
-    return 'plugins/MellowDSP/playersettings/basic.html';
+sub name {
+    return Slim::Web::HTTP::CSRF->protectName('PLUGIN_MELLOWDSP_PLAYER');
 }
 
 sub needsClient {
     return 1;
 }
 
-sub prefs {
-    return ($prefs, qw(player_enabled input_formats max_pcm_rate output_rates target_rate phase_response fir_left fir_right fir_enabled));
+sub page {
+    return Slim::Web::HTTP::CSRF->protectURI('plugins/MellowDSP/playersettings/basic.html');
 }
 
-sub playerSettings {
-    my ($client, $params) = @_;
+sub handler {
+    my ($class, $client, $params, $callback, @args) = @_;
     
-    return unless $client;
+    return undef unless $client;
     
     my $clientPrefs = $prefs->client($client);
     
     if ($params->{saveSettings}) {
-        # Salva impostazioni player
         $clientPrefs->set('player_enabled', $params->{pref_player_enabled} ? 1 : 0);
         $clientPrefs->set('fir_enabled', $params->{pref_fir_enabled} ? 1 : 0);
         $clientPrefs->set('fir_left', $params->{pref_fir_left} || '');
         $clientPrefs->set('fir_right', $params->{pref_fir_right} || '');
-        $clientPrefs->set('max_pcm_rate', $params->{pref_max_pcm_rate} || '768000');
         $clientPrefs->set('target_rate', $params->{pref_target_rate} || '176400');
         $clientPrefs->set('phase_response', $params->{pref_phase_response} || 'linear');
         
-        # Salva formati input (checkbox multiple)
         my @inputFormats = ();
         push @inputFormats, 'aiff' if $params->{pref_input_aiff};
         push @inputFormats, 'alac' if $params->{pref_input_alac};
@@ -51,7 +51,6 @@ sub playerSettings {
         push @inputFormats, 'wav' if $params->{pref_input_wav};
         $clientPrefs->set('input_formats', join(',', @inputFormats));
         
-        # Salva frequenze output (checkbox multiple)
         my @outputRates = ();
         push @outputRates, '44100' if $params->{pref_output_44100};
         push @outputRates, '48000' if $params->{pref_output_48000};
@@ -65,18 +64,9 @@ sub playerSettings {
         push @outputRates, '768000' if $params->{pref_output_768000};
         $clientPrefs->set('output_rates', join(',', @outputRates));
         
-        # Aggiorna filtri FIR se cambiato target rate
-        if ($clientPrefs->get('fir_enabled')) {
-            Plugins::MellowDSP::FIRProcessor->updateFIRForClient(
-                $client,
-                $clientPrefs->get('target_rate')
-            );
-        }
-        
         $log->info("Player settings saved for " . $client->name());
     }
     
-    # Prepara parametri per template
     my $inputFormats = $clientPrefs->get('input_formats') || 'flac,wav';
     my @inputFormatList = split(',', $inputFormats);
     my %inputFormatsHash = map { $_ => 1 } @inputFormatList;
@@ -85,13 +75,11 @@ sub playerSettings {
     my @outputRateList = split(',', $outputRates);
     my %outputRatesHash = map { $_ => 1 } @outputRateList;
     
-    $params->{client_name} = $client->name();
     $params->{prefs} = {
         player_enabled => $clientPrefs->get('player_enabled') || 0,
         fir_enabled => $clientPrefs->get('fir_enabled') || 0,
         fir_left => $clientPrefs->get('fir_left') || '',
         fir_right => $clientPrefs->get('fir_right') || '',
-        max_pcm_rate => $clientPrefs->get('max_pcm_rate') || '768000',
         target_rate => $clientPrefs->get('target_rate') || '176400',
         phase_response => $clientPrefs->get('phase_response') || 'linear',
         input_aiff => $inputFormatsHash{'aiff'} || 0,
@@ -110,10 +98,7 @@ sub playerSettings {
         output_768000 => $outputRatesHash{'768000'} || 1,
     };
     
-    return Slim::Web::HTTP::filltemplatefile(
-        'plugins/MellowDSP/playersettings/basic.html',
-        $params
-    );
+    return $class->SUPER::handler($client, $params);
 }
 
 1;
