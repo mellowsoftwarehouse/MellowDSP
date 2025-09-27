@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extensions>
+  <plugins>
+    <plugin name="MellowDSP" version="2.0.0" minTarget="7.8" maxTarget="*">
+      <title lang="EN">MellowDSP</title>
+      <desc lang="EN">Professional server-side audio processing with SOX transcoding and FIR filtering</desc>
+      <category>audio</category>
+      <creator>mellowsoftwarehouse</creator>
+      <email>mellow@softwarehouse.com</email>
+      <homepageURL>https://github.com/mellowsoftwarehouse/MellowDSP</homepageURL>
+      <url>https://raw.githubusercontent.com/mellowsoftwarehouse/MellowDSP/main/packages/MellowDSP-2.0.0.zip</url>
+      <sha>5d2a1b9f02df27733fc3de9517ba0ba36b7e8836</sha>
+    </plugin>
+  </plugins>
+</extensions>
