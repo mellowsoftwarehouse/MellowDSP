@@ -8,21 +8,29 @@ use Slim::Utils::Prefs;
 
 my $log = logger('plugin.mellowdsp.settings');
 my $prefs = preferences('plugin.mellowdsp');
+my $plugin;
+
+sub new {
+    my $class = shift;
+    $plugin = shift;
+    
+    $class->SUPER::new;
+}
 
 sub name {
-    return 'PLUGIN_MELLOWDSP';
+    return Slim::Web::HTTP::CSRF->protectName('PLUGIN_MELLOWDSP');
 }
 
 sub page {
-    return 'plugins/MellowDSP/settings/advanced.html';
+    return Slim::Web::HTTP::CSRF->protectURI('plugins/MellowDSP/settings/advanced.html');
 }
 
 sub prefs {
     return ($prefs, qw(enabled sox_path ffmpeg_path buffer_size));
 }
 
-sub advancedSettings {
-    my ($client, $params) = @_;
+sub handler {
+    my ($class, $client, $params) = @_;
     
     if ($params->{saveSettings}) {
         $prefs->set('enabled', $params->{pref_enabled} ? 1 : 0);
@@ -33,7 +41,6 @@ sub advancedSettings {
         $log->info("Advanced settings saved");
     }
     
-    # Verifica esistenza helper applications
     my $soxPath = $prefs->get('sox_path') || '/usr/bin/sox';
     my $ffmpegPath = $prefs->get('ffmpeg_path') || '/usr/bin/ffmpeg';
     
@@ -46,10 +53,7 @@ sub advancedSettings {
         ffmpeg_exists => (-f $ffmpegPath && -x $ffmpegPath) ? 1 : 0,
     };
     
-    return Slim::Web::HTTP::filltemplatefile(
-        'plugins/MellowDSP/settings/advanced.html',
-        $params
-    );
+    return $class->SUPER::handler($client, $params);
 }
 
 1;
