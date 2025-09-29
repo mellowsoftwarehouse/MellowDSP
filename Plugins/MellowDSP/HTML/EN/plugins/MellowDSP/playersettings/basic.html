@@ -1,70 +1,28 @@
 [% PROCESS settings/header.html %]
 
-<h2>MellowDSP - Player Settings: [% client_name %]</h2>
+<h2>MellowDSP Player Settings</h2>
 
-[% WRAPPER setting title="Enable MellowDSP for this player" desc="Master switch for MellowDSP processing on this specific player" %]
+[% WRAPPER setting title="Enable MellowDSP" desc="Enable audio processing for this player" %]
     <input name="pref_player_enabled" type="checkbox" [% IF prefs.player_enabled %] checked [% END %]>
 [% END %]
 
 <hr>
 
-[% WRAPPER setting title="Input Formats" desc="Audio formats to process with MellowDSP" %]
+[% WRAPPER setting title="Input Formats" desc="Audio formats to process" %]
     <input name="pref_input_aiff" type="checkbox" [% IF prefs.input_aiff %] checked [% END %]>
-    <label for="pref_input_aiff">AIFF</label>&nbsp;&nbsp;
+    <label>AIFF</label>&nbsp;&nbsp;
     
     <input name="pref_input_alac" type="checkbox" [% IF prefs.input_alac %] checked [% END %]>
-    <label for="pref_input_alac">Apple Lossless</label>&nbsp;&nbsp;
+    <label>Apple Lossless</label>&nbsp;&nbsp;
     
     <input name="pref_input_flac" type="checkbox" [% IF prefs.input_flac %] checked [% END %]>
-    <label for="pref_input_flac">FLAC</label>&nbsp;&nbsp;
+    <label>FLAC</label>&nbsp;&nbsp;
     
     <input name="pref_input_wav" type="checkbox" [% IF prefs.input_wav %] checked [% END %]>
-    <label for="pref_input_wav">WAV</label>
+    <label>WAV</label>
 [% END %]
 
-[% WRAPPER setting title="Max PCM Sample Rate" desc="Maximum sample rate this player can handle" %]
-    <select name="pref_max_pcm_rate">
-        <option value="48000" [% IF prefs.max_pcm_rate == '48000' %]selected[% END %]>48 kHz</option>
-        <option value="96000" [% IF prefs.max_pcm_rate == '96000' %]selected[% END %]>96 kHz</option>
-        <option value="192000" [% IF prefs.max_pcm_rate == '192000' %]selected[% END %]>192 kHz</option>
-        <option value="384000" [% IF prefs.max_pcm_rate == '384000' %]selected[% END %]>384 kHz</option>
-        <option value="768000" [% IF prefs.max_pcm_rate == '768000' %]selected[% END %]>768 kHz</option>
-    </select>
-[% END %]
-
-[% WRAPPER setting title="Output Sample Rates" desc="Supported output sample rates for transcoding" %]
-    <input name="pref_output_44100" type="checkbox" [% IF prefs.output_44100 %] checked [% END %]>
-    <label>44.1 kHz</label>&nbsp;&nbsp;
-    
-    <input name="pref_output_48000" type="checkbox" [% IF prefs.output_48000 %] checked [% END %]>
-    <label>48 kHz</label>&nbsp;&nbsp;
-    
-    <input name="pref_output_88200" type="checkbox" [% IF prefs.output_88200 %] checked [% END %]>
-    <label>88.2 kHz</label>&nbsp;&nbsp;
-    
-    <input name="pref_output_96000" type="checkbox" [% IF prefs.output_96000 %] checked [% END %]>
-    <label>96 kHz</label><br>
-    
-    <input name="pref_output_176400" type="checkbox" [% IF prefs.output_176400 %] checked [% END %]>
-    <label>176.4 kHz</label>&nbsp;&nbsp;
-    
-    <input name="pref_output_192000" type="checkbox" [% IF prefs.output_192000 %] checked [% END %]>
-    <label>192 kHz</label>&nbsp;&nbsp;
-    
-    <input name="pref_output_352800" type="checkbox" [% IF prefs.output_352800 %] checked [% END %]>
-    <label>352.8 kHz</label>&nbsp;&nbsp;
-    
-    <input name="pref_output_384000" type="checkbox" [% IF prefs.output_384000 %] checked [% END %]>
-    <label>384 kHz</label><br>
-    
-    <input name="pref_output_705600" type="checkbox" [% IF prefs.output_705600 %] checked [% END %]>
-    <label>705.6 kHz</label>&nbsp;&nbsp;
-    
-    <input name="pref_output_768000" type="checkbox" [% IF prefs.output_768000 %] checked [% END %]>
-    <label>768 kHz</label>
-[% END %]
-
-[% WRAPPER setting title="Target Sample Rate" desc="Primary upsampling target for this player" %]
+[% WRAPPER setting title="Target Sample Rate" desc="Upsampling target frequency" %]
     <select name="pref_target_rate">
         <option value="44100" [% IF prefs.target_rate == '44100' %]selected[% END %]>44.1 kHz (No upsampling)</option>
         <option value="88200" [% IF prefs.target_rate == '88200' %]selected[% END %]>88.2 kHz</option>
@@ -77,36 +35,66 @@
 
 [% WRAPPER setting title="Phase Response" desc="Resampling phase characteristics" %]
     <select name="pref_phase_response">
-        <option value="linear" [% IF prefs.phase_response == 'linear' %]selected[% END %]>Linear Phase (Highest Quality)</option>
+        <option value="linear" [% IF prefs.phase_response == 'linear' %]selected[% END %]>Linear Phase</option>
         <option value="intermediate" [% IF prefs.phase_response == 'intermediate' %]selected[% END %]>Intermediate Phase</option>
         <option value="minimum" [% IF prefs.phase_response == 'minimum' %]selected[% END %]>Minimum Phase</option>
     </select>
 [% END %]
 
+[% WRAPPER setting title="Output Bit Depth" desc="Target bit depth for output" %]
+    <select name="pref_output_depth">
+        <option value="16" [% IF prefs.output_depth == '16' %]selected[% END %]>16-bit</option>
+        <option value="24" [% IF prefs.output_depth == '24' %]selected[% END %]>24-bit</option>
+        <option value="32" [% IF prefs.output_depth == '32' %]selected[% END %]>32-bit</option>
+    </select>
+[% END %]
+
+[% WRAPPER setting title="Dithering Type" desc="Dithering algorithm for bit depth reduction" %]
+    <select name="pref_dither_type">
+        <option value="none" [% IF prefs.dither_type == 'none' %]selected[% END %]>None</option>
+        <option value="triangular" [% IF prefs.dither_type == 'triangular' %]selected[% END %]>Triangular</option>
+        <option value="shaped" [% IF prefs.dither_type == 'shaped' %]selected[% END %]>Shaped</option>
+        <option value="lipshitz" [% IF prefs.dither_type == 'lipshitz' %]selected[% END %]>Lipshitz</option>
+        <option value="fweighted" [% IF prefs.dither_type == 'fweighted' %]selected[% END %]>F-weighted</option>
+        <option value="eweighted" [% IF prefs.dither_type == 'eweighted' %]selected[% END %]>E-weighted</option>
+    </select>
+[% END %]
+
+[% WRAPPER setting title="Dither Precision" desc="Target precision for dithering" %]
+    <select name="pref_dither_precision">
+        <option value="16" [% IF prefs.dither_precision == '16' %]selected[% END %]>16-bit</option>
+        <option value="18" [% IF prefs.dither_precision == '18' %]selected[% END %]>18-bit</option>
+        <option value="20" [% IF prefs.dither_precision == '20' %]selected[% END %]>20-bit</option>
+        <option value="22" [% IF prefs.dither_precision == '22' %]selected[% END %]>22-bit</option>
+        <option value="24" [% IF prefs.dither_precision == '24' %]selected[% END %]>24-bit</option>
+    </select>
+[% END %]
+
 <hr>
 
-[% WRAPPER setting title="FIR Filters" desc="Room correction filters from REW measurements" %]
+[% WRAPPER setting title="FIR Filters" desc="Room correction filters from REW" %]
     <input name="pref_fir_enabled" type="checkbox" [% IF prefs.fir_enabled %] checked [% END %]>
-    <label for="pref_fir_enabled">Enable FIR Filtering</label>
+    <label>Enable FIR Filtering</label>
 [% END %]
 
-[% WRAPPER setting title="Left Channel FIR Filter" desc="WAV file from REW for left channel room correction" %]
-    <input type="text" name="pref_fir_left" value="[% prefs.fir_left %]" size="60" placeholder="/path/to/left_channel_fir.wav">
-    <br><small>Full path to WAV file generated by REW for left channel FIR filter</small>
+[% WRAPPER setting title="Left Channel FIR Filter" desc="WAV file from REW for left channel" %]
+    <input type="file" name="fir_left_file" id="fir_left_file" accept=".wav" style="display:none;" onchange="document.getElementById('pref_fir_left').value = this.files[0] ? this.files[0].name : '';">
+    <input type="text" name="pref_fir_left" id="pref_fir_left" value="[% prefs.fir_left %]" size="50" placeholder="/path/to/left_fir.wav">
+    <button type="button" onclick="document.getElementById('fir_left_file').click();">Browse...</button>
+    <br><small>Full path to WAV file or use Browse to select</small>
 [% END %]
 
-[% WRAPPER setting title="Right Channel FIR Filter" desc="WAV file from REW for right channel room correction" %]
-    <input type="text" name="pref_fir_right" value="[% prefs.fir_right %]" size="60" placeholder="/path/to/right_channel_fir.wav">
-    <br><small>Full path to WAV file generated by REW for right channel FIR filter</small>
+[% WRAPPER setting title="Right Channel FIR Filter" desc="WAV file from REW for right channel" %]
+    <input type="file" name="fir_right_file" id="fir_right_file" accept=".wav" style="display:none;" onchange="document.getElementById('pref_fir_right').value = this.files[0] ? this.files[0].name : '';">
+    <input type="text" name="pref_fir_right" id="pref_fir_right" value="[% prefs.fir_right %]" size="50" placeholder="/path/to/right_fir.wav">
+    <button type="button" onclick="document.getElementById('fir_right_file').click();">Browse...</button>
+    <br><small>Full path to WAV file or use Browse to select</small>
 [% END %]
 
 [% WRAPPER setting title="FIR Processing Info" desc="" %]
     <div style="background:#f0f8ff; padding:10px; border-radius:5px; font-size:12px;">
         <strong>Automatic FIR Resampling:</strong><br>
-        • Master FIR files are stored at original REW frequency<br>
-        • FIR filters automatically resampled to match target sample rate<br>
-        • When target rate changes, FIR filters are re-converted from masters<br>
-        • Processing: Audio upsampling → FIR filtering → Output
+        Master FIR files stored at original REW frequency, automatically resampled to match target sample rate when settings change.
     </div>
 [% END %]
 
