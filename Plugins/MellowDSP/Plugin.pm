@@ -6,7 +6,6 @@ use warnings;
 use base qw(Slim::Plugin::Base);
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
-use Slim::Web::Pages;
 
 my $log = logger('plugin.mellowdsp');
 my $prefs = preferences('plugin.mellowdsp');
@@ -14,7 +13,7 @@ my $prefs = preferences('plugin.mellowdsp');
 sub initPlugin {
     my $class = shift;
     
-    $log->info("MellowDSP v2.1.0 initializing...");
+    $log->info("MellowDSP v2.0.3 initializing...");
     
     $prefs->init({
         enabled => 0,
@@ -26,15 +25,9 @@ sub initPlugin {
     if (main::WEBUI) {
         require Plugins::MellowDSP::Settings;
         require Plugins::MellowDSP::PlayerSettings;
-        require Plugins::MellowDSP::UploadHandler;
         
         Plugins::MellowDSP::Settings->new($class);
         Plugins::MellowDSP::PlayerSettings->new($class);
-        
-        Slim::Web::Pages->addRawFunction(
-            'plugins/MellowDSP/upload',
-            \&Plugins::MellowDSP::UploadHandler::handleUpload
-        );
     }
     
     require Plugins::MellowDSP::SOXProcessor;
