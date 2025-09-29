@@ -1,41 +1,6 @@
 [% PROCESS settings/header.html %]
 
-<h2>MellowDSP Player Settings</h2>
-
-<script>
-function uploadFIR(channel) {
-    var fileInput = document.getElementById('fir_' + channel + '_file');
-    var file = fileInput.files[0];
-    
-    if (!file) {
-        alert('Please select a file');
-        return;
-    }
-    
-    var formData = new FormData();
-    formData.append('file', file);
-    formData.append('channel', channel);
-    
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/plugins/MellowDSP/upload', true);
-    
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            if (response.success) {
-                document.getElementById('pref_fir_' + channel).value = response.path;
-                alert('File uploaded and processed successfully');
-            } else {
-                alert('Upload error: ' + (response.error || 'Unknown error'));
-            }
-        } else {
-            alert('Upload failed');
-        }
-    };
-    
-    xhr.send(formData);
-}
-</script>
+<h2>[% "PLUGIN_MELLOWDSP_PLAYER" | string %] Player Settings</h2>
 
 [% WRAPPER setting title="Enable MellowDSP" desc="Enable audio processing for this player" %]
     <input name="pref_player_enabled" type="checkbox" [% IF prefs.player_enabled %] checked [% END %]>
@@ -112,20 +77,21 @@ function uploadFIR(channel) {
     <label>Enable FIR Filtering</label>
 [% END %]
 
-[% WRAPPER setting title="Left Channel FIR Filter" desc="Upload WAV file from REW" %]
-    <input type="file" id="fir_left_file" accept=".wav" style="display:none;">
-    <input type="text" name="pref_fir_left" id="pref_fir_left" value="[% prefs.fir_left %]" size="50" readonly>
-    <button type="button" onclick="document.getElementById('fir_left_file').click();">Select File</button>
-    <button type="button" onclick="uploadFIR('left');">Upload & Process</button>
-    <br><small>File will be uploaded to server and automatically converted to target sample rate</small>
+[% WRAPPER setting title="Left Channel FIR Filter" desc="Full path to WAV file on server" %]
+    <input type="text" name="pref_fir_left" value="[% prefs.fir_left %]" size="60" placeholder="/tmp/fir/left_channel.wav">
+    <br><small>Upload file to server via SFTP and enter full path here</small>
 [% END %]
 
-[% WRAPPER setting title="Right Channel FIR Filter" desc="Upload WAV file from REW" %]
-    <input type="file" id="fir_right_file" accept=".wav" style="display:none;">
-    <input type="text" name="pref_fir_right" id="pref_fir_right" value="[% prefs.fir_right %]" size="50" readonly>
-    <button type="button" onclick="document.getElementById('fir_right_file').click();">Select File</button>
-    <button type="button" onclick="uploadFIR('right');">Upload & Process</button>
-    <br><small>File will be uploaded to server and automatically converted to target sample rate</small>
+[% WRAPPER setting title="Right Channel FIR Filter" desc="Full path to WAV file on server" %]
+    <input type="text" name="pref_fir_right" value="[% prefs.fir_right %]" size="60" placeholder="/tmp/fir/right_channel.wav">
+    <br><small>Upload file to server via SFTP and enter full path here</small>
+[% END %]
+
+[% WRAPPER setting title="FIR Processing Info" desc="" %]
+    <div style="background:#f0f8ff; padding:10px; border-radius:5px; font-size:12px;">
+        <strong>Automatic FIR Resampling:</strong><br>
+        Master FIR files stored at original REW frequency, automatically resampled to match target sample rate when settings change.
+    </div>
 [% END %]
 
 [% PROCESS settings/footer.html %]
