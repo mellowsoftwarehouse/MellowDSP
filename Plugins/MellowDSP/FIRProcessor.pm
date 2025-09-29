@@ -145,3 +145,32 @@ sub cleanupOldFiles {
 }
 
 1;
+
+sub processUploadedFile {
+    my ($self, $client, $uploadPath, $channel) = @_;
+    
+    return unless $client && $uploadPath && -f $uploadPath;
+    
+    my $clientPrefs = $prefs->client($client);
+    my $targetRate = $clientPrefs->get('target_rate') || '176400';
+    
+    $log->info("Processing uploaded FIR file: $uploadPath for channel $channel");
+    
+    my $dataDir = catdir($prefs->get('cachedir') || '/tmp', 'mellowdsp');
+    my $masterDir = catdir($dataDir, 'master');
+    make_path($masterDir) unless -d $masterDir;
+    
+    my $clientId = $client->id();
+    my $masterFile = catfile($masterDir, "${clientId}_${channel}_master.wav");
+    
+    copy($uploadPath, $masterFile);
+    $log->info("Stored master FIR: $masterFile");
+    
+    $clientPrefs->set("fir_${channel}", $masterFile);
+    
+    $self->convertFIRToSampleRate($client, $targetRate);
+    
+    unlink($uploadPath);
+    
+    return 1;
+}
