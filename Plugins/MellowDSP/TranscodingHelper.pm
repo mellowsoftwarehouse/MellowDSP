@@ -30,24 +30,34 @@ sub registerConverters {
     
     foreach my $inFmt (@inputFormats) {
         foreach my $outFmt (@outputFormats) {
-            my $profile = "$inFmt-$outFmt-mellowdsp-*-*";
             
-            my $command = "$soxPath -t $inFmt \$FILE\$ -t $outFmt -b 24";
-            
+            my $profile_file = "$inFmt-$outFmt-mellowdsp-file-*";
+            my $command_file = "$soxPath -t $inFmt \$FILE\$ -t $outFmt -b 24";
             if ($outFmt eq 'flc') {
-                $command .= " -C 0";
+                $command_file .= " -C 0";
             }
+            $command_file .= " -";
             
-            $command .= " -";
-            
-            $Slim::Player::TranscodingHelper::commandTable{$profile} = $command;
-            
-            $Slim::Player::TranscodingHelper::capabilities{$profile} = {
+            $Slim::Player::TranscodingHelper::commandTable{$profile_file} = $command_file;
+            $Slim::Player::TranscodingHelper::capabilities{$profile_file} = {
                 'F' => 'F',
                 'T' => 'F',
             };
+            $log->info("Registered: $profile_file (File)");
             
-            $log->info("Registered: $profile");
+            my $profile_stream = "$inFmt-$outFmt-mellowdsp-stream-*";
+            my $command_stream = "$soxPath -t $inFmt - -t $outFmt -b 24";
+            if ($outFmt eq 'flc') {
+                $command_stream .= " -C 0";
+            }
+            $command_stream .= " -";
+            
+            $Slim::Player::TranscodingHelper::commandTable{$profile_stream} = $command_stream;
+            $Slim::Player::TranscodingHelper::capabilities{$profile_stream} = {
+                'F' => 'R',
+                'T' => 'F',
+            };
+            $log->info("Registered: $profile_stream (Remote stream)");
         }
     }
 }
