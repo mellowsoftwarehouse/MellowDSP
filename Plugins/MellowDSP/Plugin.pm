@@ -27,6 +27,8 @@ sub initPlugin {
         buffer_size => '16',
     });
     
+    require Plugins::MellowDSP::Settings;
+    require Plugins::MellowDSP::PlayerSettings;
     require Plugins::MellowDSP::SOXProcessor;
     require Plugins::MellowDSP::FIRProcessor;
     
@@ -40,7 +42,7 @@ sub initPlugin {
         tag    => 'mellowdsp',
     );
     
-    $log->info("MellowDSP Plugin initialized successfully");
+    $log->info("MellowDSP Plugin initialized");
 }
 
 sub registerTranscoders {
@@ -69,10 +71,10 @@ sub registerTranscoders {
             'T' => 'F',
         };
         
-        $log->info("Registered: $profile -> $command");
+        $log->info("Registered: $profile");
     }
-    
-    $log->info("MellowDSP transcoders registered");
 }
+
+sub getDisplayName { 'PLUGIN_MELLOWDSP' }
 
 1;
