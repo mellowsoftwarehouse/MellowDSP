@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 package Plugins::MellowDSP::Plugin;
 
 use strict;
@@ -6,53 +5,74 @@ use warnings;
 use base qw(Slim::Plugin::Base);
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
+use Slim::Player::TranscodingHelper;
 
-my $log = logger('plugin.mellowdsp');
+my $log = Slim::Utils::Log->addLogCategory({
+    category     => 'plugin.mellowdsp',
+    defaultLevel => 'INFO',
+    description  => 'PLUGIN_MELLOWDSP',
+});
+
 my $prefs = preferences('plugin.mellowdsp');
 
 sub initPlugin {
     my $class = shift;
     
-    $log->info("MellowDSP v2.1.0 initializing...");
+    $log->info("MellowDSP Plugin initializing...");
     
     $prefs->init({
-        enabled => 0,
+        enabled => 1,
         sox_path => '/usr/bin/sox',
         ffmpeg_path => '/usr/bin/ffmpeg',
-        buffer_size => 8,
+        buffer_size => '16',
     });
-    
-    if (main::WEBUI) {
-        require Plugins::MellowDSP::Settings;
-        require Plugins::MellowDSP::PlayerSettings;
-        
-        Plugins::MellowDSP::Settings->new($class);
-        Plugins::MellowDSP::PlayerSettings->new($class);
-    }
     
     require Plugins::MellowDSP::SOXProcessor;
     require Plugins::MellowDSP::FIRProcessor;
-    require Plugins::MellowDSP::TranscodingHelper;
     
     Plugins::MellowDSP::SOXProcessor->init();
     Plugins::MellowDSP::FIRProcessor->init();
-    Plugins::MellowDSP::TranscodingHelper->init();
     
-    $class->SUPER::initPlugin(@_);
-    $log->info("MellowDSP loaded successfully");
+    registerTranscoders();
+    
+    $class->SUPER::initPlugin(
+        feed   => \&Plugins::MellowDSP::Settings::menu,
+        tag    => 'mellowdsp',
+    );
+    
+    $log->info("MellowDSP Plugin initialized successfully");
 }
 
-sub getDisplayName {
-    return 'PLUGIN_MELLOWDSP';
-}
-
-sub settingsChanged {
-    my ($class, $client) = @_;
+sub registerTranscoders {
     
-    require Plugins::MellowDSP::TranscodingHelper;
-    Plugins::MellowDSP::TranscodingHelper::registerConverters();
+    return unless $prefs->get('enabled');
     
-    $log->info("Settings changed, converters re-registered");
+    my $soxPath = $prefs->get('sox_path') || '/usr/bin/sox';
+    
+    $log->info("Registering MellowDSP transcoders...");
+    
+    my @conversions = (
+        ['flc', 'wav'],
+        ['aif', 'wav'],
+        ['alc', 'wav'],
+    );
+    
+    foreach my $conv (@conversions) {
+        my ($from, $to) = @$conv;
+        my $profile = "$from-$to-mellowdsp-*-*";
+        
+        my $command = "$soxPath -t $from \$FILE\$ -t $to -b 24 -";
+        
+        $Slim::Player::TranscodingHelper::commandTable{$profile} = $command;
+        
+        $Slim::Player::TranscodingHelper::capabilities{$profile} = {
+            'T' => 'F',
+        };
+        
+        $log->info("Registered: $profile -> $command");
+    }
+    
+    $log->info("MellowDSP transcoders registered");
 }
 
 1;
