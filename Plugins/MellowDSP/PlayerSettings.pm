@@ -44,7 +44,6 @@ sub handler {
         $clientPrefs->set('target_rate', $params->{pref_target_rate} || '176400');
         $clientPrefs->set('phase_response', $params->{pref_phase_response} || 'linear');
         $clientPrefs->set('output_depth', $params->{pref_output_depth} || '24');
-        $clientPrefs->set('output_format', $params->{pref_output_format} || 'wav');
         $clientPrefs->set('dither_type', $params->{pref_dither_type} || 'none');
         $clientPrefs->set('dither_precision', $params->{pref_dither_precision} || '24');
         
@@ -70,7 +69,6 @@ sub handler {
         target_rate => $clientPrefs->get('target_rate') || '176400',
         phase_response => $clientPrefs->get('phase_response') || 'linear',
         output_depth => $clientPrefs->get('output_depth') || '24',
-        output_format => $clientPrefs->get('output_format') || 'wav',
         dither_type => $clientPrefs->get('dither_type') || 'none',
         dither_precision => $clientPrefs->get('dither_precision') || '24',
         input_aiff => $inputFormatsHash{'aiff'} || 0,

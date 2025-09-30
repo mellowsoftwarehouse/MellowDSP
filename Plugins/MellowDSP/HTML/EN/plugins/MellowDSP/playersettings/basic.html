@@ -22,13 +22,6 @@
     <label>WAV</label>
 [% END %]
 
-[% WRAPPER setting title="Output Format" desc="Format for processed audio" %]
-    <select name="pref_output_format">
-        <option value="wav" [% IF prefs.output_format == 'wav' %]selected[% END %]>WAV (Uncompressed PCM)</option>
-        <option value="flac" [% IF prefs.output_format == 'flac' %]selected[% END %]>FLAC (Lossless Compressed)</option>
-    </select>
-[% END %]
-
 [% WRAPPER setting title="Target Sample Rate" desc="Upsampling target frequency" %]
     <select name="pref_target_rate">
         <option value="44100" [% IF prefs.target_rate == '44100' %]selected[% END %]>44.1 kHz</option>
