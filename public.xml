@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extensions>
+    <details>
+        <title lang="EN">MellowDSP Plugin Repository</title>
+    </details>
+    <plugins>
+        <plugin name="MellowDSP" version="2.1.2" minTarget="8.0" maxTarget="*">
+            <title lang="EN">MellowDSP</title>
+            <desc lang="EN">Advanced DSP processing with SOX and FIR filters for Lyrion Music Server</desc>
+            <url>https://github.com/mellowsoftwarehouse/MellowDSP/raw/main/packages/MellowDSP-2.1.2.zip</url>
+            <sha>ccdfce04e1f05cc2da4162398116dbf46aa8a00a</sha>
+            <creator>Mellow Software House</creator>
+            <email>support@mellowsoftware.com</email>
+        </plugin>
+    </plugins>
+</extensions>
