@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<extension>
+	<id>91d8fb10-mellow-11e3-ac10-0800200c9a66</id>
+	<name>PLUGIN_MELLOWDSP</name>
+	<module>Plugins::MellowDSP::Plugin</module>
+	<version>2.1.6</version>
+	<description>PLUGIN_MELLOWDSP_DESC</description>
+	<creator>mellowsoftwarehouse</creator>
+	<email>mellow@softwarehouse.com</email>
+	<defaultState>enabled</defaultState>
+	<playerMenu>SETTINGS</playerMenu>
+	<homepageURL>https://github.com/mellowsoftwarehouse/MellowDSP</homepageURL>
+	<optionsURL>plugins/MellowDSP/settings/advanced.html</optionsURL>
+	<playerSettingsURL>plugins/MellowDSP/playersettings/basic.html</playerSettingsURL>
+	<type>2</type>
+	<targetApplication>
+		<id>Logitech Media Server</id>
+		<minVersion>7.8</minVersion>
+		<maxVersion>*</maxVersion>
+	</targetApplication>
+</extension>
