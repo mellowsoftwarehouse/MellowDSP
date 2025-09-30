@@ -1,0 +1,38 @@
+[% PROCESS settings/header.html %]
+
+<h2>MellowDSP - Advanced Settings</h2>
+
+[% WRAPPER setting title="Enable MellowDSP Globally" desc="Master switch for the system" %]
+    <input name="pref_enabled" type="checkbox" [% IF prefs.enabled %] checked [% END %]>
+[% END %]
+
+<hr>
+
+[% WRAPPER setting title="SOX Path" desc="Path to SOX binary" %]
+    <input type="text" name="pref_sox_path" value="[% prefs.sox_path %]" size="50">
+    [% IF prefs.sox_exists %]
+        <span style="color:green;">✓ Found</span>
+    [% ELSE %]
+        <span style="color:red;">✗ Not found</span>
+    [% END %]
+[% END %]
+
+[% WRAPPER setting title="FFMPEG Path" desc="Path to FFMPEG binary" %]
+    <input type="text" name="pref_ffmpeg_path" value="[% prefs.ffmpeg_path %]" size="50">
+    [% IF prefs.ffmpeg_exists %]
+        <span style="color:green;">✓ Found</span>
+    [% ELSE %]
+        <span style="color:red;">✗ Not found</span>
+    [% END %]
+[% END %]
+
+[% WRAPPER setting title="Buffer Size" desc="SOX buffer size in KB" %]
+    <select name="pref_buffer_size">
+        <option value="4" [% IF prefs.buffer_size == '4' %]selected[% END %]>4 KB</option>
+        <option value="8" [% IF prefs.buffer_size == '8' %]selected[% END %]>8 KB</option>
+        <option value="16" [% IF prefs.buffer_size == '16' %]selected[% END %]>16 KB</option>
+        <option value="32" [% IF prefs.buffer_size == '32' %]selected[% END %]>32 KB</option>
+    </select>
+[% END %]
+
+[% PROCESS settings/footer.html %]

@@ -1,0 +1,8 @@
+PLUGIN_MELLOWDSP
+	EN	MellowDSP
+
+PLUGIN_MELLOWDSP_DESC
+	EN	Professional server-side audio processing with SOX transcoding and FIR filtering
+
+PLUGIN_MELLOWDSP_PLAYER
+	EN	MellowDSP
