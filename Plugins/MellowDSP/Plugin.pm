@@ -13,7 +13,7 @@ my $prefs = preferences('plugin.mellowdsp');
 sub initPlugin {
     my $class = shift;
     
-    $log->info("MellowDSP v2.0.3 initializing...");
+    $log->info("MellowDSP v2.1.0 initializing...");
     
     $prefs->init({
         enabled => 0,
@@ -32,8 +32,11 @@ sub initPlugin {
     
     require Plugins::MellowDSP::SOXProcessor;
     require Plugins::MellowDSP::FIRProcessor;
+    require Plugins::MellowDSP::TranscodingHelper;
+    
     Plugins::MellowDSP::SOXProcessor->init();
     Plugins::MellowDSP::FIRProcessor->init();
+    Plugins::MellowDSP::TranscodingHelper->init();
     
     $class->SUPER::initPlugin(@_);
     $log->info("MellowDSP loaded successfully");
@@ -41,6 +44,15 @@ sub initPlugin {
 
 sub getDisplayName {
     return 'PLUGIN_MELLOWDSP';
+}
+
+sub settingsChanged {
+    my ($class, $client) = @_;
+    
+    require Plugins::MellowDSP::TranscodingHelper;
+    Plugins::MellowDSP::TranscodingHelper::registerConverters();
+    
+    $log->info("Settings changed, converters re-registered");
 }
 
 1;
