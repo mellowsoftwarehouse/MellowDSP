@@ -28,7 +28,7 @@ sub initPlugin {
         description  => 'PLUGIN_MELLOWDSP',
     });
     
-    $log->info("MellowDSP v2.5.0 initializing...");
+    $log->info("MellowDSP v2.5.1 initializing...");
     
     $prefs->init({
         enabled => 0,
@@ -50,6 +50,8 @@ sub initPlugin {
     
     Plugins::MellowDSP::SOXProcessor->init();
     Plugins::MellowDSP::FIRProcessor->init();
+    
+    _disableConflictingProfiles();
     
     my @clients = Slim::Player::Client::clients();
     foreach my $client (@clients) {
@@ -73,6 +75,27 @@ sub initPlugin {
 sub shutdownPlugin {
     Slim::Control::Request::unsubscribe(\&newClientCallback);
     Slim::Control::Request::unsubscribe(\&clientReconnectCallback);
+}
+
+sub _disableConflictingProfiles {
+    
+    return unless $prefs->get('enabled');
+    
+    $log->info("Disabling conflicting profiles for flac, aiff, alac...");
+    
+    my $conv = Slim::Player::TranscodingHelper::Conversions();
+    my $count = 0;
+    
+    for my $profile (keys %$conv) {
+        if ($profile =~ /^(flc|aif|alc)-/) {
+            delete $Slim::Player::TranscodingHelper::commandTable{$profile};
+            delete $Slim::Player::TranscodingHelper::capabilities{$profile};
+            $count++;
+            $log->debug("Disabled profile: $profile");
+        }
+    }
+    
+    $log->info("Disabled $count conflicting profiles");
 }
 
 sub newClientCallback {
