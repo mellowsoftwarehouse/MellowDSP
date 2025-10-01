@@ -13,10 +13,16 @@ my $log = logger('plugin.mellowdsp');
 my $prefs = preferences('plugin.mellowdsp');
 my $class;
 
+my %formatMap = (
+    'flc' => 'flac',
+    'aif' => 'aiff',
+    'alc' => 'alac',
+);
+
 sub initPlugin {
     $class = shift;
     
-    $log->info("MellowDSP v2.4.0 initializing...");
+    $log->info("MellowDSP v2.4.1 initializing...");
     
     $prefs->init({
         enabled => 0,
@@ -38,6 +44,11 @@ sub initPlugin {
     
     Plugins::MellowDSP::SOXProcessor->init();
     Plugins::MellowDSP::FIRProcessor->init();
+    
+    my @clients = Slim::Player::Client::clients();
+    foreach my $client (@clients) {
+        _setupTranscoderForClient($client);
+    }
     
     Slim::Control::Request::subscribe(
         \&newClientCallback,
@@ -100,7 +111,9 @@ sub _setupTranscoderForClient {
     foreach my $inFmt (@inputFormats) {
         my $profile = "$inFmt-pcm-*-$macaddress";
         
-        my $command = "$soxPath -t $inFmt \$FILE\$ -t wav -b 24 -";
+        my $soxFormat = $formatMap{$inFmt} || $inFmt;
+        
+        my $command = "$soxPath -t $soxFormat \$FILE\$ -t wav -b 24 -";
         
         $Slim::Player::TranscodingHelper::commandTable{$profile} = $command;
         
@@ -110,7 +123,7 @@ sub _setupTranscoderForClient {
             I => 'noArgs',
         };
         
-        $log->info("Registered converter: $profile");
+        $log->info("Registered converter: $profile (SOX format: $soxFormat)");
     }
 }
 
