@@ -9,7 +9,7 @@ use Slim::Player::TranscodingHelper;
 use Slim::Player::Client;
 use Slim::Control::Request;
 
-my $log = logger('plugin.mellowdsp');
+my $log;
 my $prefs = preferences('plugin.mellowdsp');
 my $class;
 
@@ -22,7 +22,13 @@ my %formatMap = (
 sub initPlugin {
     $class = shift;
     
-    $log->info("MellowDSP v2.4.1 initializing...");
+    $log = Slim::Utils::Log->addLogCategory({
+        category     => 'plugin.mellowdsp',
+        defaultLevel => 'INFO',
+        description  => 'PLUGIN_MELLOWDSP',
+    });
+    
+    $log->info("MellowDSP v2.5.0 initializing...");
     
     $prefs->init({
         enabled => 0,
@@ -98,8 +104,15 @@ sub _setupTranscoderForClient {
     
     my $clientPrefs = $prefs->client($client);
     
-    return unless $prefs->get('enabled');
-    return unless $clientPrefs->get('player_enabled');
+    unless ($prefs->get('enabled')) {
+        $log->warn("Plugin not enabled globally, skipping " . $client->name());
+        return;
+    }
+    
+    unless ($clientPrefs->get('player_enabled')) {
+        $log->warn("Plugin not enabled for player " . $client->name());
+        return;
+    }
     
     my $macaddress = $client->id();
     my $soxPath = $prefs->get('sox_path') || '/usr/bin/sox';
