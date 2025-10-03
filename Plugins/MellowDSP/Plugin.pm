@@ -23,12 +23,11 @@ sub initPlugin {
         description  => 'PLUGIN_MELLOWDSP',
     });
     
-    $log->info("MellowDSP v3.0.0 initializing...");
+    $log->info("MellowDSP v3.0.1 initializing...");
     
     $prefs->init({
         enabled => 0,
         sox_path => '/usr/bin/sox',
-        camilladsp_path => '/usr/local/bin/camilladsp',
     });
     
     if (main::WEBUI) {
@@ -130,27 +129,18 @@ sub _setupTranscoderForClient {
     my $outputFormat = $clientPrefs->get('output_format') || 'wav';
     my $targetRate = $clientPrefs->get('target_rate') || '';
     
-    my $firConfig = '';
-    if ($clientPrefs->get('fir_enabled')) {
-        $firConfig = _generateCamillaDSPConfig($client);
-    }
-    
     $log->info("Setting up transcoder for " . $client->name());
     
     my @inputFormats = qw(flc aif alc);
     
     foreach my $inFmt (@inputFormats) {
-        my $outFmt = ($outputFormat eq 'flac') ? 'flc' : 'pcm';
+        my $outFmt = ($outputFormat eq 'flac') ? 'flc' : 'wav';
         my $profile = "$inFmt-$outFmt-*-$macaddress";
         
         my $command = "[perl] $scriptPath -c \$CLIENTID\$ -i $inFmt -o $outputFormat";
         
         if ($targetRate) {
             $command .= " -r $targetRate";
-        }
-        
-        if ($firConfig) {
-            $command .= " -f $firConfig";
         }
         
         $command .= " \$FILE\$";
@@ -165,12 +155,6 @@ sub _setupTranscoderForClient {
         
         $log->info("Registered: $profile");
     }
-}
-
-sub _generateCamillaDSPConfig {
-    my $client = shift;
-    
-    return '';
 }
 
 sub getDisplayName {
