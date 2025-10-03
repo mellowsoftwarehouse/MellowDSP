@@ -3,79 +3,64 @@ package Plugins::MellowDSP::PlayerSettings;
 use strict;
 use warnings;
 use base qw(Slim::Web::Settings);
-use Slim::Utils::Log;
+
 use Slim::Utils::Prefs;
+use Slim::Utils::Log;
 
-my $log = logger('plugin.mellowdsp.player');
 my $prefs = preferences('plugin.mellowdsp');
-my $plugin;
-
-sub new {
-    my $class = shift;
-    $plugin = shift;
-    
-    $class->SUPER::new;
-}
+my $log = logger('plugin.mellowdsp');
 
 sub name {
-    return Slim::Web::HTTP::CSRF->protectName('PLUGIN_MELLOWDSP_PLAYER');
-}
-
-sub needsClient {
-    return 1;
+    return 'PLUGIN_MELLOWDSP';
 }
 
 sub page {
-    return Slim::Web::HTTP::CSRF->protectURI('plugins/MellowDSP/playersettings/basic.html');
+    return 'plugins/MellowDSP/playersettings/basic.html';
+}
+
+sub prefs {
+    my ($class, $client) = @_;
+    return ($prefs->client($client), qw(
+        enabled
+        output_format
+        output_samplerate
+        phase_response
+        fir_enabled
+        fir_left
+        fir_right
+    ));
 }
 
 sub handler {
-    my ($class, $client, $params, $callback, @args) = @_;
+    my ($class, $client, $params) = @_;
     
-    return undef unless $client;
-    
-    my $clientPrefs = $prefs->client($client);
-    
-    if ($params->{saveSettings}) {
-        $clientPrefs->set('player_enabled', $params->{pref_player_enabled} ? 1 : 0);
-        $clientPrefs->set('fir_enabled', $params->{pref_fir_enabled} ? 1 : 0);
-        $clientPrefs->set('fir_left', $params->{pref_fir_left} || '');
-        $clientPrefs->set('fir_right', $params->{pref_fir_right} || '');
-        $clientPrefs->set('target_rate', $params->{pref_target_rate} || '176400');
-        $clientPrefs->set('phase_response', $params->{pref_phase_response} || 'linear');
-        $clientPrefs->set('output_depth', $params->{pref_output_depth} || '24');
-        $clientPrefs->set('dither_type', $params->{pref_dither_type} || 'none');
-        $clientPrefs->set('dither_precision', $params->{pref_dither_precision} || '24');
-        
-        my @inputFormats = ();
-        push @inputFormats, 'aiff' if $params->{pref_input_aiff};
-        push @inputFormats, 'alac' if $params->{pref_input_alac};
-        push @inputFormats, 'flac' if $params->{pref_input_flac};
-        push @inputFormats, 'wav' if $params->{pref_input_wav};
-        $clientPrefs->set('input_formats', join(',', @inputFormats));
-        
-        $log->info("Player settings saved for " . $client->name());
+    if ($params->{'saveSettings'}) {
     }
     
-    my $inputFormats = $clientPrefs->get('input_formats') || 'flac,wav';
-    my @inputFormatList = split(',', $inputFormats);
-    my %inputFormatsHash = map { $_ => 1 } @inputFormatList;
+    $params->{output_formats} = [
+        { value => 'wav',  label => 'WAV (Uncompressed)' },
+        { value => 'flac', label => 'FLAC (Lossless)' },
+    ];
     
-    $params->{prefs} = {
-        player_enabled => $clientPrefs->get('player_enabled') || 0,
-        fir_enabled => $clientPrefs->get('fir_enabled') || 0,
-        fir_left => $clientPrefs->get('fir_left') || '',
-        fir_right => $clientPrefs->get('fir_right') || '',
-        target_rate => $clientPrefs->get('target_rate') || '176400',
-        phase_response => $clientPrefs->get('phase_response') || 'linear',
-        output_depth => $clientPrefs->get('output_depth') || '24',
-        dither_type => $clientPrefs->get('dither_type') || 'none',
-        dither_precision => $clientPrefs->get('dither_precision') || '24',
-        input_aiff => $inputFormatsHash{'aiff'} || 0,
-        input_alac => $inputFormatsHash{'alac'} || 0,
-        input_flac => $inputFormatsHash{'flac'} || 1,
-        input_wav => $inputFormatsHash{'wav'} || 1,
-    };
+    $params->{sample_rates} = [
+        { value => '0',      label => 'No resampling' },
+        { value => '44100',  label => '44.1 kHz' },
+        { value => '48000',  label => '48 kHz' },
+        { value => '88200',  label => '88.2 kHz' },
+        { value => '96000',  label => '96 kHz' },
+        { value => '176400', label => '176.4 kHz' },
+        { value => '192000', label => '192 kHz' },
+        { value => '352800', label => '352.8 kHz' },
+        { value => '384000', label => '384 kHz' },
+        { value => '705600', label => '705.6 kHz' },
+        { value => '768000', label => '768 kHz' },
+    ];
+    
+    $params->{phase_responses} = [
+        { value => 'linear',       label => 'Linear Phase' },
+        { value => 'intermediate', label => 'Intermediate Phase' },
+        { value => 'minimum',      label => 'Minimum Phase' },
+    ];
     
     return $class->SUPER::handler($client, $params);
 }
