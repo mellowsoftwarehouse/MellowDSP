@@ -8,16 +8,11 @@ use Slim::Utils::Prefs;
 use Slim::Player::TranscodingHelper;
 use Slim::Player::Client;
 use Slim::Control::Request;
+use File::Spec::Functions qw(catfile catdir);
 
 my $log;
 my $prefs = preferences('plugin.mellowdsp');
 my $class;
-
-my %formatMap = (
-    'flc' => 'flac',
-    'aif' => 'aiff',
-    'alc' => 'alac',
-);
 
 sub initPlugin {
     $class = shift;
@@ -28,13 +23,12 @@ sub initPlugin {
         description  => 'PLUGIN_MELLOWDSP',
     });
     
-    $log->info("MellowDSP v2.5.1 initializing...");
+    $log->info("MellowDSP v3.0.0 initializing...");
     
     $prefs->init({
         enabled => 0,
         sox_path => '/usr/bin/sox',
-        ffmpeg_path => '/usr/bin/ffmpeg',
-        buffer_size => 8,
+        camilladsp_path => '/usr/local/bin/camilladsp',
     });
     
     if (main::WEBUI) {
@@ -44,12 +38,6 @@ sub initPlugin {
         Plugins::MellowDSP::Settings->new($class);
         Plugins::MellowDSP::PlayerSettings->new($class);
     }
-    
-    require Plugins::MellowDSP::SOXProcessor;
-    require Plugins::MellowDSP::FIRProcessor;
-    
-    Plugins::MellowDSP::SOXProcessor->init();
-    Plugins::MellowDSP::FIRProcessor->init();
     
     _disableConflictingProfiles();
     
@@ -81,7 +69,7 @@ sub _disableConflictingProfiles {
     
     return unless $prefs->get('enabled');
     
-    $log->info("Disabling conflicting profiles for flac, aiff, alac...");
+    $log->info("Disabling conflicting profiles...");
     
     my $conv = Slim::Player::TranscodingHelper::Conversions();
     my $count = 0;
@@ -91,7 +79,6 @@ sub _disableConflictingProfiles {
             delete $Slim::Player::TranscodingHelper::commandTable{$profile};
             delete $Slim::Player::TranscodingHelper::capabilities{$profile};
             $count++;
-            $log->debug("Disabled profile: $profile");
         }
     }
     
@@ -128,28 +115,45 @@ sub _setupTranscoderForClient {
     my $clientPrefs = $prefs->client($client);
     
     unless ($prefs->get('enabled')) {
-        $log->warn("Plugin not enabled globally, skipping " . $client->name());
         return;
     }
     
     unless ($clientPrefs->get('player_enabled')) {
-        $log->warn("Plugin not enabled for player " . $client->name());
         return;
     }
     
     my $macaddress = $client->id();
-    my $soxPath = $prefs->get('sox_path') || '/usr/bin/sox';
+    my $cacheDir = $prefs->get('cachedir') || Slim::Utils::Prefs::preferences('server')->get('cachedir');
+    my $pluginDir = catdir($cacheDir, '..', 'InstalledPlugins', 'Plugins', 'MellowDSP');
+    my $scriptPath = catfile($pluginDir, 'Bin', 'mellowdsp.pl');
     
-    $log->info("Setting up transcoder for " . $client->name() . " ($macaddress)");
+    my $outputFormat = $clientPrefs->get('output_format') || 'wav';
+    my $targetRate = $clientPrefs->get('target_rate') || '';
+    
+    my $firConfig = '';
+    if ($clientPrefs->get('fir_enabled')) {
+        $firConfig = _generateCamillaDSPConfig($client);
+    }
+    
+    $log->info("Setting up transcoder for " . $client->name());
     
     my @inputFormats = qw(flc aif alc);
     
     foreach my $inFmt (@inputFormats) {
-        my $profile = "$inFmt-pcm-*-$macaddress";
+        my $outFmt = ($outputFormat eq 'flac') ? 'flc' : 'pcm';
+        my $profile = "$inFmt-$outFmt-*-$macaddress";
         
-        my $soxFormat = $formatMap{$inFmt} || $inFmt;
+        my $command = "[perl] $scriptPath -c \$CLIENTID\$ -i $inFmt -o $outputFormat";
         
-        my $command = "$soxPath -t $soxFormat \$FILE\$ -t wav -b 24 -";
+        if ($targetRate) {
+            $command .= " -r $targetRate";
+        }
+        
+        if ($firConfig) {
+            $command .= " -f $firConfig";
+        }
+        
+        $command .= " \$FILE\$";
         
         $Slim::Player::TranscodingHelper::commandTable{$profile} = $command;
         
@@ -159,8 +163,14 @@ sub _setupTranscoderForClient {
             I => 'noArgs',
         };
         
-        $log->info("Registered converter: $profile (SOX format: $soxFormat)");
+        $log->info("Registered: $profile");
     }
+}
+
+sub _generateCamillaDSPConfig {
+    my $client = shift;
+    
+    return '';
 }
 
 sub getDisplayName {
