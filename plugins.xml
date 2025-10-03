@@ -4,12 +4,12 @@
     <title lang="EN">Mellow Software House Plugin Repository</title>
   </details>
   <plugins>
-    <plugin name="MellowDSP" version="3.0.7" minTarget="9.0" maxTarget="*">
+    <plugin name="MellowDSP" version="3.1.0" minTarget="9.0" maxTarget="*">
       <title lang="EN">MellowDSP</title>
-      <desc lang="EN">Professional server-side audio processing with SOX transcoding and FIR filtering</desc>
-      <url>https://raw.githubusercontent.com/mellowsoftwarehouse/MellowDSP/main/packages/MellowDSP-3.0.7.zip</url>
+      <desc lang="EN">Professional server-side audio processing with SOX, CamillaDSP FIR filtering, and WAV/FLAC output</desc>
+      <url>https://raw.githubusercontent.com/mellowsoftwarehouse/MellowDSP/main/packages/MellowDSP-3.1.0.zip</url>
       <link>https://github.com/mellowsoftwarehouse/MellowDSP</link>
-      <sha>27e687460341a3397498fec1262c5936f428681d</sha>
+      <sha>2fc6a9049582b521e73c2f7f05a5768d730d2e4f</sha>
       <creator>Mellow Software House</creator>
       <email>info@mellowsoftwarehouse.com</email>
     </plugin>
