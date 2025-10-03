@@ -5,7 +5,7 @@ use Getopt::Long;
 
 my $logfile = '/tmp/mellowdsp_wrapper.log';
 open(my $log, '>>', $logfile) or die "Cannot open log: $!";
-print $log "\n=== MellowDSP Wrapper v3.0.5 Called ===\n";
+print $log "\n=== MellowDSP Wrapper Called ===\n";
 print $log "Time: " . localtime() . "\n";
 print $log "Raw ARGV: " . join(' ', @ARGV) . "\n";
 
@@ -46,14 +46,18 @@ my %codecMap = (
 );
 
 my $inFormat = $codecMap{$options->{inCodec}} || $options->{inCodec} || 'flac';
+
 my $soxPath = '/usr/bin/sox';
 
+# Build command: input → output format → stdout → effects
 my @cmd = ($soxPath, '-t', $inFormat, $file, '-t', 'wav', '-b', '24', '-');
 
+# Add resampling effect AFTER stdout specification
 if ($options->{samplerate} && $options->{samplerate} > 0) {
     push @cmd, 'rate', '-v', '-s', $options->{samplerate};
 }
 
+# Add trim if specified
 if ($options->{startSec}) {
     push @cmd, 'trim', $options->{startSec};
     if ($options->{durationSec}) {

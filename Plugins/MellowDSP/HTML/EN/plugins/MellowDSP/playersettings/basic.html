@@ -8,14 +8,6 @@
 
 <hr>
 
-[% WRAPPER setting title="Output Format" desc="Output stream format to client" %]
-    <select name="pref_output_format">
-        <option value="wav" [% IF prefs.output_format == 'wav' || !prefs.output_format %]selected[% END %]>WAV (Uncompressed)</option>
-        <option value="flac" [% IF prefs.output_format == 'flac' %]selected[% END %]>FLAC (Lossless)</option>
-    </select>
-    <br><small>WAV for dedicated audio network (fiber optic), FLAC for bandwidth-constrained networks</small>
-[% END %]
-
 [% WRAPPER setting title="Input Formats" desc="Audio formats to process" %]
     <input name="pref_input_aiff" type="checkbox" [% IF prefs.input_aiff %] checked [% END %]>
     <label>AIFF</label>&nbsp;&nbsp;
@@ -32,7 +24,6 @@
 
 [% WRAPPER setting title="Target Sample Rate" desc="Upsampling target frequency" %]
     <select name="pref_target_rate">
-        <option value="" [% IF !prefs.target_rate %]selected[% END %]>No resampling</option>
         <option value="44100" [% IF prefs.target_rate == '44100' %]selected[% END %]>44.1 kHz</option>
         <option value="88200" [% IF prefs.target_rate == '88200' %]selected[% END %]>88.2 kHz</option>
         <option value="176400" [% IF prefs.target_rate == '176400' %]selected[% END %]>176.4 kHz</option>
