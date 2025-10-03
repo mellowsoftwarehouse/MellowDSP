@@ -5,6 +5,8 @@ use warnings;
 use base qw(Slim::Web::Settings);
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
+use File::Spec::Functions qw(catfile catdir);
+use File::Copy;
 
 my $log = logger('plugin.mellowdsp.player');
 my $prefs = preferences('plugin.mellowdsp');
@@ -37,15 +39,55 @@ sub handler {
     my $clientPrefs = $prefs->client($client);
     
     if ($params->{saveSettings}) {
+        my $needsReload = 0;
+        
+        my $oldFirEnabled = $clientPrefs->get('fir_enabled') || 0;
+        my $oldTargetRate = $clientPrefs->get('target_rate') || '';
+        
         $clientPrefs->set('player_enabled', $params->{pref_player_enabled} ? 1 : 0);
         $clientPrefs->set('fir_enabled', $params->{pref_fir_enabled} ? 1 : 0);
-        $clientPrefs->set('fir_left', $params->{pref_fir_left} || '');
-        $clientPrefs->set('fir_right', $params->{pref_fir_right} || '');
         $clientPrefs->set('target_rate', $params->{pref_target_rate} || '176400');
         $clientPrefs->set('phase_response', $params->{pref_phase_response} || 'linear');
         $clientPrefs->set('output_depth', $params->{pref_output_depth} || '24');
         $clientPrefs->set('dither_type', $params->{pref_dither_type} || 'none');
         $clientPrefs->set('dither_precision', $params->{pref_dither_precision} || '24');
+        $clientPrefs->set('output_format', $params->{pref_output_format} || 'wav');
+        
+        my $pluginDir = Plugins::MellowDSP::Plugin->_pluginDataFor('basedir');
+        my $firDir = catdir($pluginDir, 'FIR', 'masters');
+        mkdir($firDir) unless -d $firDir;
+        
+        if ($params->{pref_fir_left_upload} && $params->{pref_fir_left_upload} ne '') {
+            my $filename = 'left_' . $client->id() . '.wav';
+            my $filepath = catfile($firDir, $filename);
+            
+            open(my $fh, '>', $filepath) or $log->error("Cannot write FIR left: $!");
+            binmode($fh);
+            print $fh $params->{pref_fir_left_upload};
+            close($fh);
+            
+            $clientPrefs->set('fir_left', $filepath);
+            $log->info("Uploaded left FIR: $filepath");
+            $needsReload = 1;
+        } elsif ($params->{pref_fir_left}) {
+            $clientPrefs->set('fir_left', $params->{pref_fir_left});
+        }
+        
+        if ($params->{pref_fir_right_upload} && $params->{pref_fir_right_upload} ne '') {
+            my $filename = 'right_' . $client->id() . '.wav';
+            my $filepath = catfile($firDir, $filename);
+            
+            open(my $fh, '>', $filepath) or $log->error("Cannot write FIR right: $!");
+            binmode($fh);
+            print $fh $params->{pref_fir_right_upload};
+            close($fh);
+            
+            $clientPrefs->set('fir_right', $filepath);
+            $log->info("Uploaded right FIR: $filepath");
+            $needsReload = 1;
+        } elsif ($params->{pref_fir_right}) {
+            $clientPrefs->set('fir_right', $params->{pref_fir_right});
+        }
         
         my @inputFormats = ();
         push @inputFormats, 'aiff' if $params->{pref_input_aiff};
@@ -53,6 +95,20 @@ sub handler {
         push @inputFormats, 'flac' if $params->{pref_input_flac};
         push @inputFormats, 'wav' if $params->{pref_input_wav};
         $clientPrefs->set('input_formats', join(',', @inputFormats));
+        
+        my $newFirEnabled = $clientPrefs->get('fir_enabled') || 0;
+        my $newTargetRate = $clientPrefs->get('target_rate') || '';
+        
+        if ($oldFirEnabled != $newFirEnabled || $oldTargetRate ne $newTargetRate) {
+            $needsReload = 1;
+        }
+        
+        if ($needsReload && $client->isPlaying()) {
+            Slim::Player::Source::playmode($client, 'stop');
+            Slim::Player::Playlist::jump($client, 1);
+            
+            $log->info("Settings changed, auto-skipping to next track for: " . $client->name());
+        }
         
         $log->info("Player settings saved for " . $client->name());
     }
@@ -71,6 +127,7 @@ sub handler {
         output_depth => $clientPrefs->get('output_depth') || '24',
         dither_type => $clientPrefs->get('dither_type') || 'none',
         dither_precision => $clientPrefs->get('dither_precision') || '24',
+        output_format => $clientPrefs->get('output_format') || 'wav',
         input_aiff => $inputFormatsHash{'aiff'} || 0,
         input_alac => $inputFormatsHash{'alac'} || 0,
         input_flac => $inputFormatsHash{'flac'} || 1,

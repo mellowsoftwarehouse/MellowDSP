@@ -86,20 +86,28 @@
     <label>Enable FIR Filtering</label>
 [% END %]
 
-[% WRAPPER setting title="Left Channel FIR Filter" desc="Full path to WAV file on server" %]
-    <input type="text" name="pref_fir_left" value="[% prefs.fir_left %]" size="60" placeholder="/tmp/fir/left_channel.wav">
-    <br><small>Upload file to server via SFTP and enter full path here</small>
+[% WRAPPER setting title="Left Channel FIR Filter" desc="Upload WAV file from REW" %]
+    <input type="file" name="pref_fir_left_upload" accept=".wav" style="margin-bottom: 5px;">
+    <br><small>Or enter path on server:</small>
+    <input type="text" name="pref_fir_left" value="[% prefs.fir_left %]" size="60" placeholder="/tmp/fir/left.wav">
+    [% IF prefs.fir_left %]
+        <br><small style="color: green;">Current: [% prefs.fir_left %]</small>
+    [% END %]
 [% END %]
 
-[% WRAPPER setting title="Right Channel FIR Filter" desc="Full path to WAV file on server" %]
-    <input type="text" name="pref_fir_right" value="[% prefs.fir_right %]" size="60" placeholder="/tmp/fir/right_channel.wav">
-    <br><small>Upload file to server via SFTP and enter full path here</small>
+[% WRAPPER setting title="Right Channel FIR Filter" desc="Upload WAV file from REW" %]
+    <input type="file" name="pref_fir_right_upload" accept=".wav" style="margin-bottom: 5px;">
+    <br><small>Or enter path on server:</small>
+    <input type="text" name="pref_fir_right" value="[% prefs.fir_right %]" size="60" placeholder="/tmp/fir/right.wav">
+    [% IF prefs.fir_right %]
+        <br><small style="color: green;">Current: [% prefs.fir_right %]</small>
+    [% END %]
 [% END %]
 
 [% WRAPPER setting title="FIR Processing Info" desc="" %]
     <div style="background:#f0f8ff; padding:10px; border-radius:5px; font-size:12px;">
-        <strong>Automatic FIR Resampling:</strong><br>
-        Master FIR files stored at original REW frequency, automatically resampled to match target sample rate when settings change.
+        <strong>Upload FIR Files:</strong> Use file upload buttons above to upload FIR filters directly from your computer.<br>
+        <strong>Auto-reload:</strong> When you change FIR or sample rate settings, the current track will automatically skip to apply new settings.
     </div>
 [% END %]
 
