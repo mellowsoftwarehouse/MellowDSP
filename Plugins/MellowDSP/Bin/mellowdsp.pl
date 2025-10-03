@@ -15,7 +15,11 @@ GetOptions(
     'r=s' => \$options->{samplerate},
 );
 
-my $file = $ARGV[0] || '-';
+my $file = shift @ARGV;
+
+if (!$file || $file eq '') {
+    die "No input file specified\n";
+}
 
 my %codecMap = (
     'flc' => 'flac',
@@ -23,7 +27,7 @@ my %codecMap = (
     'alc' => 'alac',
 );
 
-my $inFormat = $codecMap{$options->{inCodec}} || $options->{inCodec};
+my $inFormat = $codecMap{$options->{inCodec}} || $options->{inCodec} || 'flac';
 my $outFormat = $options->{outCodec} || 'wav';
 my $soxPath = '/usr/bin/sox';
 
