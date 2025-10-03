@@ -24,7 +24,7 @@ sub initPlugin {
         description  => 'PLUGIN_MELLOWDSP',
     });
     
-    $log->info("MellowDSP v3.0.2 initializing...");
+    $log->info("MellowDSP v3.1.0 initializing...");
     
     $prefs->init({
         enabled => 0,
@@ -141,8 +141,15 @@ sub _setupTranscoderForClient {
     
     my $outputFormat = $clientPrefs->get('output_format') || 'wav';
     my $targetRate = $clientPrefs->get('target_rate') || '';
+    my $firEnabled = $clientPrefs->get('fir_enabled') || 0;
+    my $firLeft = $clientPrefs->get('fir_left') || '';
+    my $firRight = $clientPrefs->get('fir_right') || '';
     
     $log->info("Setting up transcoder for " . $client->name());
+    $log->info("FIR enabled: $firEnabled");
+    
+    my $pluginDir = abs_path(__FILE__);
+    $pluginDir =~ s/Plugin\.pm$//;
     
     my @inputFormats = qw(flc aif alc);
     
@@ -154,6 +161,22 @@ sub _setupTranscoderForClient {
         
         if ($targetRate) {
             $command .= " -r $targetRate";
+        }
+        
+        if ($firEnabled && $firLeft && $firRight && -f $firLeft && -f $firRight) {
+            require Plugins::MellowDSP::CamillaDSPHelper;
+            
+            my $configFile = Plugins::MellowDSP::CamillaDSPHelper->generateConfig(
+                $macaddress, 
+                $targetRate || 96000, 
+                $firLeft, 
+                $firRight
+            );
+            
+            if ($configFile) {
+                $command .= " --fir --fir-config=$configFile";
+                $log->info("FIR filter enabled with config: $configFile");
+            }
         }
         
         $command .= " \$FILE\$";
