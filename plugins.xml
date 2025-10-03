@@ -9,7 +9,7 @@
       <desc lang="EN">Professional server-side audio processing with SOX transcoding and FIR filtering via CamillaDSP</desc>
       <url>https://raw.githubusercontent.com/mellowsoftwarehouse/MellowDSP/main/packages/MellowDSP-3.0.5.zip</url>
       <link>https://github.com/mellowsoftwarehouse/MellowDSP</link>
-      <sha>bc71e22d4199e3f931bb6c50dafdef67ce596f09</sha>
+      <sha>10c321de86e002498b7014c618485e888e923f54</sha>
       <creator>Mellow Software House</creator>
       <email>info@mellowsoftwarehouse.com</email>
     </plugin>

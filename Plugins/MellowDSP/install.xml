@@ -1,21 +1,20 @@
-<?xml version="1.0"?>
+<?xml version='1.0' standalone='yes'?>
 <extension>
-	<id>91d8fb10-mellow-11e3-ac10-0800200c9a66</id>
-	<name>PLUGIN_MELLOWDSP</name>
-	<module>Plugins::MellowDSP::Plugin</module>
-	<version>3.1.1</version>
-	<description>PLUGIN_MELLOWDSP_DESC</description>
-	<creator>mellowsoftwarehouse</creator>
-	<email>mellow@softwarehouse.com</email>
-	<defaultState>enabled</defaultState>
-	<playerMenu>SETTINGS</playerMenu>
-	<homepageURL>https://github.com/mellowsoftwarehouse/MellowDSP</homepageURL>
-	<optionsURL>plugins/MellowDSP/settings/advanced.html</optionsURL>
-	<playerSettingsURL>plugins/MellowDSP/playersettings/basic.html</playerSettingsURL>
-	<type>2</type>
-	<targetApplication>
-		<id>Logitech Media Server</id>
-		<minVersion>7.8</minVersion>
-		<maxVersion>*</maxVersion>
-	</targetApplication>
+  <name>PLUGIN_MELLOWDSP</name>
+  <creator>Mellow Software House</creator>
+  <defaultState>enabled</defaultState>
+  <description>PLUGIN_MELLOWDSP_DESC</description>
+  <email>info@mellowsoftwarehouse.com</email>
+  <homepageURL>https://github.com/mellowsoftwarehouse/MellowDSP</homepageURL>
+  <id>5A8C91E2-24C6-11EF-9262-0242AC120002</id>
+  <module>Plugins::MellowDSP::Plugin</module>
+  <optionsURL>plugins/MellowDSP/settings/advanced.html</optionsURL>
+  <playerSettingsClass>Plugins::MellowDSP::PlayerSettings</playerSettingsClass>
+  <targetApplication>
+    <id>Lyrion Music Server</id>
+    <maxVersion>*</maxVersion>
+    <minVersion>9.0</minVersion>
+  </targetApplication>
+  <type>2</type>
+  <version>3.0.5</version>
 </extension>
