@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use Getopt::Long;
 
-# Log file per debug
 my $logfile = '/tmp/mellowdsp_wrapper.log';
 open(my $log, '>>', $logfile) or die "Cannot open log: $!";
 print $log "\n=== MellowDSP Wrapper Called ===\n";
@@ -25,7 +24,6 @@ my $file = shift @ARGV;
 print $log "Parsed options:\n";
 print $log "  clientId: " . ($options->{clientId} || 'NONE') . "\n";
 print $log "  inCodec: " . ($options->{inCodec} || 'NONE') . "\n";
-print $log "  outCodec: " . ($options->{outCodec} || 'NONE') . "\n";
 print $log "  samplerate: " . ($options->{samplerate} || 'NONE') . "\n";
 print $log "  file: " . ($file || 'NONE') . "\n";
 
@@ -48,26 +46,23 @@ my %codecMap = (
 );
 
 my $inFormat = $codecMap{$options->{inCodec}} || $options->{inCodec} || 'flac';
-my $outFormat = $options->{outCodec} || 'wav';
 
 my $soxPath = '/usr/bin/sox';
-my @cmd = ($soxPath, '-t', $inFormat, $file, '-t', 'wav', '-b', '24');
 
-if ($options->{samplerate}) {
+# Build command: input → output format → stdout → effects
+my @cmd = ($soxPath, '-t', $inFormat, $file, '-t', 'wav', '-b', '24', '-');
+
+# Add resampling effect AFTER stdout specification
+if ($options->{samplerate} && $options->{samplerate} > 0) {
     push @cmd, 'rate', '-v', '-s', $options->{samplerate};
 }
 
+# Add trim if specified
 if ($options->{startSec}) {
     push @cmd, 'trim', $options->{startSec};
     if ($options->{durationSec}) {
         push @cmd, $options->{durationSec};
     }
-}
-
-if ($outFormat eq 'flac') {
-    push @cmd, '-t', 'flac', '-C', '0', '-';
-} else {
-    push @cmd, '-';
 }
 
 print $log "Final SOX command: " . join(' ', @cmd) . "\n";
