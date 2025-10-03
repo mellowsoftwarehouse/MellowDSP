@@ -43,6 +43,7 @@ sub handler {
         
         my $oldFirEnabled = $clientPrefs->get('fir_enabled') || 0;
         my $oldTargetRate = $clientPrefs->get('target_rate') || '';
+        my $oldOutputFormat = $clientPrefs->get('output_format') || 'wav';
         
         $clientPrefs->set('player_enabled', $params->{pref_player_enabled} ? 1 : 0);
         $clientPrefs->set('fir_enabled', $params->{pref_fir_enabled} ? 1 : 0);
@@ -98,16 +99,22 @@ sub handler {
         
         my $newFirEnabled = $clientPrefs->get('fir_enabled') || 0;
         my $newTargetRate = $clientPrefs->get('target_rate') || '';
+        my $newOutputFormat = $clientPrefs->get('output_format') || 'wav';
         
-        if ($oldFirEnabled != $newFirEnabled || $oldTargetRate ne $newTargetRate) {
+        if ($oldFirEnabled != $newFirEnabled || $oldTargetRate ne $newTargetRate || $oldOutputFormat ne $newOutputFormat) {
             $needsReload = 1;
         }
         
-        if ($needsReload && $client->isPlaying()) {
-            Slim::Player::Source::playmode($client, 'stop');
-            Slim::Player::Playlist::jump($client, 1);
+        if ($needsReload) {
+            Plugins::MellowDSP::Plugin::_setupTranscoderForClient($client);
             
-            $log->info("Settings changed, auto-skipping to next track for: " . $client->name());
+            if ($client->isPlaying() || $client->isPaused()) {
+                my $songIndex = Slim::Player::Source::songIndex($client);
+                $client->execute(['playlist', 'index', $songIndex, 'noplay:1']);
+                $client->execute(['playlist', 'index', $songIndex + 1]);
+                
+                $log->info("Settings changed, reloading transcoder and skipping track for: " . $client->name());
+            }
         }
         
         $log->info("Player settings saved for " . $client->name());
