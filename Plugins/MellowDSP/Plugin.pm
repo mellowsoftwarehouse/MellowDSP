@@ -9,6 +9,7 @@ use Slim::Player::TranscodingHelper;
 use Slim::Player::Client;
 use Slim::Control::Request;
 use File::Spec::Functions qw(catfile catdir);
+use Cwd qw(abs_path);
 
 my $log;
 my $prefs = preferences('plugin.mellowdsp');
@@ -19,11 +20,11 @@ sub initPlugin {
     
     $log = Slim::Utils::Log->addLogCategory({
         category     => 'plugin.mellowdsp',
-        defaultLevel => 'INFO',
+        defaultLevel => 'DEBUG',
         description  => 'PLUGIN_MELLOWDSP',
     });
     
-    $log->info("MellowDSP v3.0.1 initializing...");
+    $log->info("MellowDSP v3.0.2 initializing...");
     
     $prefs->init({
         enabled => 0,
@@ -122,9 +123,21 @@ sub _setupTranscoderForClient {
     }
     
     my $macaddress = $client->id();
-    my $cacheDir = $prefs->get('cachedir') || Slim::Utils::Prefs::preferences('server')->get('cachedir');
-    my $pluginDir = catdir($cacheDir, '..', 'InstalledPlugins', 'Plugins', 'MellowDSP');
-    my $scriptPath = catfile($pluginDir, 'Bin', 'mellowdsp.pl');
+    
+    my $scriptPath = abs_path(__FILE__);
+    $scriptPath =~ s/Plugin\.pm$/Bin\/mellowdsp.pl/;
+    
+    $log->info("Script absolute path: $scriptPath");
+    
+    if (!-f $scriptPath) {
+        $log->error("Script not found at: $scriptPath");
+        return;
+    }
+    
+    if (!-x $scriptPath) {
+        $log->error("Script not executable at: $scriptPath");
+        return;
+    }
     
     my $outputFormat = $clientPrefs->get('output_format') || 'wav';
     my $targetRate = $clientPrefs->get('target_rate') || '';
@@ -154,6 +167,7 @@ sub _setupTranscoderForClient {
         };
         
         $log->info("Registered: $profile");
+        $log->info("Command: $command");
     }
 }
 
